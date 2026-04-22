@@ -1,0 +1,49 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+*-checkpoint.ipynb
+
+# IDEs / editors
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Environment / secrets
+.env
+.env.local
+*.key
+
+# Data files (too large for Git; see data/README.md to download)
+data/*.csv
+data/*.zip
+
+# Trained model artifacts
+*.pkl
+*.joblib
+*.h5
+saved_models/
+
+# Generated outputs
+/scratch/
+/tmp/
+*.log
