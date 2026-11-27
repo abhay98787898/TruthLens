@@ -248,14 +248,14 @@ welfake-fake-news-detection/
 - van der Maaten, L., & Hinton, G. (2008). Visualizing data using t-SNE. *Journal of Machine Learning Research*, 9, 2579–2605.
 - Pedregosa, F. et al. (2011). Scikit-learn: Machine learning in Python. *Journal of Machine Learning Research*, 12, 2825–2830.
 
-## Team
+## Project Team
 
-- **Dhruvi Gandhi**
-- **Luciano Handal Baracatt**
-- **Matteo Mirgone** *(maintainer of this repository)*
-- **Sameeksha Kini**
+**Developed by:** Abhay Pratap Singh
 
-**Mentor:** Prof. Greg Green
-**Course:** ADSP 31009 — Machine Learning I, MS in Applied Data Science, The University of Chicago
+**Mentor:** Sudhesna Roy
 
-*This is a team project. The code, report, and analysis are the collective work of all four authors. This repository is maintained by Matteo Mirgone for portfolio purposes; please credit the full author list in any derivative work.*
+**College:** BVIMIT
+
+---
+
+*TruthLens is an academic machine learning project focused on fake news detection using Natural Language Processing and explainable classification techniques.*
