@@ -1,4 +1,4 @@
-
+from datetime import date
 from pathlib import Path
 import json
 
@@ -13,45 +13,99 @@ MODEL_PATH = ROOT / "artifacts" / "final_svm_pipeline.joblib"
 METADATA_PATH = ROOT / "artifacts" / "model_metadata.json"
 REPORTS_DIR = ROOT / "reports"
 
+INK = "#3b2f2a"
+BRICK = "#b5532f"
+GREEN = "#5f7a61"
+GREY = "#8a7766"
+
 st.set_page_config(
-    page_title="TruthLens | Fake News Research",
-    page_icon="🔎",
+    page_title="TruthLens",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 st.markdown("""
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap');
+
+:root {
+    --cocoa: #3b2f2a;
+    --grey: #8a7766;
+    --cream: #fbf5ea;
+    --sand: #efe2cc;
+    --line: #e0d0b4;
+    --terracotta: #b5532f;
+    --sage: #5f7a61;
+    --shadow: 0 3px 14px rgba(120, 85, 40, 0.10);
+}
+
 .stApp {
-    background: #0b1120;
-    color: #e5e7eb;
+    background: linear-gradient(180deg, #f6ecda 0%, #f1e3cb 100%);
+    color: var(--cocoa);
 }
-[data-testid="stSidebar"] {
-    background: #111827;
-    border-right: 1px solid #263244;
+[data-testid="stHeader"] { background: transparent; }
+.stApp p, .stApp li, .stApp label, .stApp span,
+[data-testid="stMarkdownContainer"] { color: var(--cocoa); }
+
+.block-container { max-width: 1080px; padding-top: 2rem; }
+footer { visibility: hidden; }
+
+h1, h2, h3, .masthead h1 {
+    font-family: 'Source Serif 4', Georgia, serif !important;
+    color: var(--cocoa) !important;
+    letter-spacing: -0.01em;
 }
-.block-container {
-    padding-top: 2rem;
-    max-width: 1450px;
-}
-.metric-card {
-    background: #111c2e;
-    border: 1px solid #26354b;
-    padding: 20px;
-    border-radius: 14px;
-    margin-bottom: 10px;
-}
-.hero {
-    padding: 26px;
-    border: 1px solid #26354b;
-    border-radius: 18px;
-    background: linear-gradient(120deg, #13233a, #111827);
-    margin-bottom: 22px;
-}
-.small-muted {
-    color: #9ca3af;
-    font-size: 0.9rem;
-}
+
+.masthead { background: var(--cream); border: 1px solid var(--line);
+            border-radius: 18px; box-shadow: var(--shadow);
+            padding: 16px 28px 20px 28px; margin-bottom: 22px; }
+.masthead .dateline { font-size: 0.75rem; letter-spacing: 0.08em;
+                      text-transform: uppercase; color: var(--grey);
+                      display: flex; justify-content: space-between; }
+.masthead h1 { font-size: 3.2rem; margin: 6px 0 2px 0; padding: 0; line-height: 1.1; }
+.masthead .tagline { font-family: 'Source Serif 4', Georgia, serif;
+                     font-style: italic; color: var(--grey); font-size: 1.05rem; }
+
+.stTabs [data-baseweb="tab-list"] { gap: 26px; border-bottom: 1px solid var(--line); }
+.stTabs [data-baseweb="tab"] { font-family: 'Source Serif 4', Georgia, serif;
+                               font-size: 1.05rem; padding-left: 2px; padding-right: 2px; }
+.stTabs [data-baseweb="tab-highlight"] { background-color: var(--terracotta); }
+
+.figures { display: grid; grid-template-columns: repeat(3, 1fr);
+           gap: 14px; margin: 16px 0 8px 0; }
+.figures div { background: var(--cream); border: 1px solid var(--line);
+               border-radius: 14px; box-shadow: var(--shadow);
+               padding: 16px 20px; }
+.figures .num { display: block; font-family: 'Source Serif 4', Georgia, serif;
+                font-size: 2.1rem; font-weight: 600; color: var(--terracotta); }
+.figures .lbl { font-size: 0.85rem; color: var(--grey); }
+
+.verdict { background: var(--cream); border: 1px solid var(--line);
+           border-left: 8px solid var(--grey); border-radius: 14px;
+           box-shadow: var(--shadow); padding: 16px 22px; margin: 12px 0 16px 0; }
+.verdict.fake { border-left-color: var(--terracotta); }
+.verdict.real { border-left-color: var(--sage); }
+.verdict .small { font-size: 0.75rem; letter-spacing: 0.08em;
+                  text-transform: uppercase; color: var(--grey); }
+.verdict .word { font-family: 'Source Serif 4', Georgia, serif;
+                 font-size: 2.4rem; font-weight: 700; line-height: 1.15; }
+.verdict.fake .word { color: var(--terracotta); }
+.verdict.real .word { color: var(--sage); }
+.verdict .score { font-family: monospace; color: var(--grey); }
+
+.st-key-input_card { background: var(--cream); border: 1px solid var(--line) !important;
+                     border-radius: 16px; box-shadow: var(--shadow); padding: 8px 12px; }
+[data-testid="stExpander"] { background: var(--cream); border: 1px solid var(--line);
+                             border-radius: 12px; }
+[data-testid="stExpander"] details { border: none; }
+
+div[data-baseweb="input"], div[data-baseweb="textarea"] {
+    border-radius: 10px; background: #fffaf0; }
+div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea {
+    background: #fffaf0; color: var(--cocoa); }
+.stButton > button { border-radius: 999px; font-weight: 600; padding: 0.5rem 1.6rem;
+                     background: var(--terracotta); border: none; color: #fff7ea; }
+.stButton > button:hover { background: #9c4526; color: #fff7ea; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -60,7 +114,7 @@ st.markdown("""
 def load_model():
     if not MODEL_PATH.exists():
         raise FileNotFoundError(
-            "Model missing. Run: python scripts/train_final_model.py"
+            "Model file not found. Run: python scripts/train_final_model.py"
         )
     return joblib.load(MODEL_PATH)
 
@@ -72,568 +126,333 @@ def load_metadata():
     return {}
 
 
+@st.cache_data
+def read_report(filename):
+    path = REPORTS_DIR / filename
+    if not path.exists():
+        return pd.DataFrame()
+    try:
+        return pd.read_csv(path)
+    except Exception:
+        return pd.DataFrame()
+
+
 try:
     model = load_model()
     metadata = load_metadata()
 except Exception as exc:
-    st.error(f"Could not load model: {exc}")
+    st.error(f"Could not load the model: {exc}")
     st.stop()
 
 
-st.sidebar.title("🔎 TruthLens")
-st.sidebar.caption("Explainable Fake News Research")
-page = st.sidebar.radio(
-    "NAVIGATION",
-    ["Dashboard", "Analyze News", "Model Insights", "About Research"],
+# ---------- helpers ----------
+
+VARIANT_NAMES = {
+    "baseline_original_text": "Original text",
+    "source_and_boilerplate_cues_removed": "Source/boilerplate cues removed",
+}
+METRICS = [
+    ("accuracy", "Accuracy"),
+    ("precision", "Precision"),
+    ("recall", "Recall"),
+    ("f1", "F1 score"),
+    ("roc_auc", "ROC-AUC"),
+]
+
+
+def show_table(df):
+    st.dataframe(df, width="stretch", hide_index=True)
+
+
+def summary_table(df):
+    out = pd.DataFrame({"Setup": df["variant"].replace(VARIANT_NAMES)})
+    for key, label in METRICS:
+        mean_col, std_col = f"{key}_mean", f"{key}_std"
+        if mean_col in df.columns and std_col in df.columns:
+            out[label] = [
+                f"{m:.4f} ± {s:.4f}" for m, s in zip(df[mean_col], df[std_col])
+            ]
+    return out
+
+
+def f1_pair(df):
+    base = df.loc[df["variant"] == "baseline_original_text", "f1_mean"]
+    cleaned = df.loc[
+        df["variant"] == "source_and_boilerplate_cues_removed", "f1_mean"
+    ]
+    if base.empty or cleaned.empty:
+        return None
+    return float(base.iloc[0]), float(cleaned.iloc[0])
+
+
+def style_fig(fig):
+    fig.update_layout(
+        template="simple_white",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(color=INK),
+        margin=dict(l=10, r=10, t=50, b=10),
+    )
+    return fig
+
+
+def section_note(text):
+    st.markdown(f"<span style='color:{GREY}'>{text}</span>",
+                unsafe_allow_html=True)
+
+
+# ---------- masthead ----------
+
+st.markdown(f"""
+<div class="masthead">
+  <div class="dateline">
+    <span>TF-IDF + Linear SVM &nbsp;|&nbsp; WELFake dataset</span>
+    <span>{date.today().strftime("%A, %d %B %Y")}</span>
+  </div>
+  <h1>TruthLens</h1>
+  <div class="tagline">A fake-news classifier, and a look at how far its
+  scores can really be trusted.</div>
+</div>
+""", unsafe_allow_html=True)
+
+tab_overview, tab_check, tab_eval, tab_notes = st.tabs(
+    ["Overview", "Check an article", "Evaluation details", "Notes and limits"]
 )
-st.sidebar.divider()
-st.sidebar.caption("Local research prototype • WELFake dataset")
 
 
-def read_report(filename):
-    path = REPORTS_DIR / filename
-    if path.exists():
-        try:
-            return pd.read_csv(path)
-        except Exception:
-            return pd.DataFrame()
-    return pd.DataFrame()
+# ---------- overview ----------
 
+with tab_overview:
+    st.write(
+        "TruthLens takes a headline and an article body and labels the text "
+        "Fake or Real using TF-IDF features and a linear SVM. The classifier "
+        "itself is simple. Most of the work in this project went into "
+        "evaluation: removing duplicates, splitting by groups so similar "
+        "articles don't land on both sides, and testing what happens when "
+        "source-specific wording is stripped out."
+    )
 
-
-if page == "Dashboard":
-    st.markdown("""
-    <div class="hero">
-      <h1>TruthLens Research Dashboard</h1>
-      <p>Explainable fake-news classification with group-aware evaluation.</p>
-      <span class="small-muted">TF-IDF · Linear SVM · Multi-seed robustness</span>
+    rows = metadata.get("training_rows", 0)
+    st.markdown(f"""
+    <div class="figures">
+      <div><span class="num">{rows:,}</span>
+           <span class="lbl">rows used to train the demo model</span></div>
+      <div><span class="num">3</span>
+           <span class="lbl">random seeds in the robustness runs</span></div>
+      <div><span class="num">0</span>
+           <span class="lbl">near-duplicate groups shared by train and test</span></div>
     </div>
     """, unsafe_allow_html=True)
-
-    # Existing reports
-    baseline = read_report("baseline_metrics.csv")
-    group = read_report("text_group_split_metrics.csv")
-    ablation = read_report("cue_ablation_metrics.csv")
-
-    # Corrected multi-seed reports
-    multiseed = read_report(
-        "multiseed_robustness_corrected_summary.csv"
-    )
-    per_seed = read_report(
-        "multiseed_robustness_corrected_per_seed.csv"
-    )
-    paired = read_report(
-        "multiseed_f1_paired_differences_corrected.csv"
+    section_note(
+        "The row count is for the separately trained demo model. The scores "
+        "below come from the group-aware experiments."
     )
 
-    st.subheader("Research overview")
+    st.subheader("Main result: three seeds")
+    multiseed = read_report("multiseed_robustness_corrected_summary.csv")
 
-    c1, c2, c3 = st.columns(3)
-    c1.metric(
-        "Final model training rows",
-        f"{metadata.get('training_rows', 0):,}"
-    )
-    c2.metric("Multi-seed evaluation seeds", "3")
-    c3.metric("Near-duplicate group overlap", "0 shared groups")
-
-    st.caption(
-        "Training-row count refers to the separately trained demo model. "
-        "Evaluation metrics below come from group-aware research experiments."
-    )
-
-    st.divider()
-    st.subheader("Multi-seed robustness evaluation")
-
-    if not multiseed.empty:
-        st.caption(
-            "Values show mean ± sample standard deviation across seeds 7, 21 and 42."
-        )
-
-        display = multiseed.copy()
-        display["variant"] = display["variant"].replace({
-            "baseline_original_text": "Original text",
-            "source_and_boilerplate_cues_removed": "Source/boilerplate cues removed",
-        })
-
-        metric_names = [
-            ("accuracy", "Accuracy"),
-            ("precision", "Precision"),
-            ("recall", "Recall"),
-            ("f1", "F1 score"),
-            ("roc_auc", "ROC-AUC"),
-        ]
-
-        for metric, label in metric_names:
-            mean_col = f"{metric}_mean"
-            std_col = f"{metric}_std"
-
-            if mean_col in display.columns and std_col in display.columns:
-                display[label] = display.apply(
-                    lambda row: (
-                        f"{float(row[mean_col]):.4f} ± "
-                        f"{float(row[std_col]):.4f}"
-                    ),
-                    axis=1,
-                )
-
-        visible_columns = ["variant"] + [
-            label for _, label in metric_names
-            if label in display.columns
-        ]
-
-        st.dataframe(
-            display[visible_columns],
-            width="stretch",
-            hide_index=True,
-        )
-
-        chart_data = multiseed.copy()
-        chart_data["variant"] = chart_data["variant"].replace({
-            "baseline_original_text": "Original text",
-            "source_and_boilerplate_cues_removed": "Cues removed",
-        })
-
-        chart = px.bar(
-            chart_data,
-            x="variant",
-            y="f1_mean",
-            error_y="f1_std",
-            title="Mean F1 score across three seeds",
-            labels={
-                "variant": "Experiment",
-                "f1_mean": "Mean F1 score",
-            },
-            template="plotly_dark",
-        )
-        st.plotly_chart(chart, width="stretch")
-
-        baseline_row = multiseed[
-            multiseed["variant"] == "baseline_original_text"
-        ]
-        cleaned_row = multiseed[
-            multiseed["variant"]
-            == "source_and_boilerplate_cues_removed"
-        ]
-
-        if not baseline_row.empty and not cleaned_row.empty:
-            base_f1 = float(baseline_row.iloc[0]["f1_mean"])
-            clean_f1 = float(cleaned_row.iloc[0]["f1_mean"])
-            difference_pp = (base_f1 - clean_f1) * 100
-
-            st.metric(
-                "Mean F1 difference",
-                f"{difference_pp:.2f} percentage points",
-                help=(
-                    "Original text minus source/boilerplate cue-removed text. "
-                    "This is an observed association, not proof of leakage or causation."
-                ),
-            )
-    else:
+    if multiseed.empty:
         st.warning(
-            "Corrected multi-seed summary not found. "
-            "Check reports/multiseed_robustness_corrected_summary.csv."
+            "reports/multiseed_robustness_corrected_summary.csv is missing. "
+            "Run scripts/research_multiseed_robustness.py to generate it."
         )
+    else:
+        section_note("Mean ± sample standard deviation over seeds 7, 21 and 42.")
+        show_table(summary_table(multiseed))
 
-    if not per_seed.empty:
-        with st.expander("View individual seed results"):
-            st.dataframe(
-                per_seed,
-                width="stretch",
-                hide_index=True,
+        chart_df = multiseed.copy()
+        chart_df["variant"] = chart_df["variant"].replace(VARIANT_NAMES)
+        fig = px.scatter(
+            chart_df, x="variant", y="f1_mean", error_y="f1_std",
+            labels={"variant": "", "f1_mean": "Mean F1"},
+            title="Mean F1 with one standard deviation",
+        )
+        fig.update_traces(marker=dict(size=14, color=BRICK),
+                          error_y=dict(color=INK, thickness=1.5))
+        st.plotly_chart(style_fig(fig), width="stretch")
+
+        pair = f1_pair(multiseed)
+        if pair:
+            gap = (pair[0] - pair[1]) * 100
+            st.write(
+                f"F1 drops by **{gap:.2f} percentage points** when the "
+                "source and boilerplate cues are removed. That is an observed "
+                "difference only; it does not prove leakage or say what caused it."
             )
 
-    if not paired.empty:
-        with st.expander("View paired F1 differences"):
-            st.dataframe(
-                paired,
-                width="stretch",
-                hide_index=True,
-            )
-
-    st.divider()
-    st.subheader("Earlier research reports")
-
-    with st.expander("Baseline model experiments"):
-        if not baseline.empty:
-            st.dataframe(baseline, width="stretch", hide_index=True)
-        else:
-            st.info("Baseline report not available.")
-
-    with st.expander("Article-body group split"):
-        if not group.empty:
-            st.dataframe(group, width="stretch", hide_index=True)
-        else:
-            st.info("Article-body group-split report not available.")
-
-    with st.expander("Source-cue ablation"):
-        if not ablation.empty:
-            st.dataframe(ablation, width="stretch", hide_index=True)
-        else:
-            st.info("Source-cue ablation report not available.")
-
-    st.divider()
-    st.subheader("Research limitations")
-
-    st.markdown("""
-    - Evaluation uses three different splits of the same WELFake dataset;
-      it is not external-dataset validation.
-    - Group-aware splitting prevents identified groups from crossing
-      train and test sets, but does not guarantee publisher, topic or
-      temporal independence.
-    - MinHash LSH is approximate and may miss near duplicates.
-    - Source-cue removal uses a manually selected list. The F1 difference
-      does not prove that the cues caused data leakage.
-    - LinearSVC decision scores are not calibrated probabilities.
-    """)
-
-    st.caption(
-        "The saved prediction model is trained on the cleaned dataset for "
-        "demonstration. Its performance should not be presented as independent "
-        "test performance from the multi-seed experiments."
-    )
+    st.subheader("Earlier experiments")
+    for title, fname in [
+        ("Baseline models", "baseline_metrics.csv"),
+        ("Article-body group split", "text_group_split_metrics.csv"),
+        ("Source-cue ablation", "cue_ablation_metrics.csv"),
+    ]:
+        with st.expander(title):
+            df = read_report(fname)
+            if df.empty:
+                st.info(f"{fname} not found in reports/.")
+            else:
+                show_table(df)
 
 
+# ---------- check an article ----------
 
-elif page == "Analyze News":
-    st.markdown("""
-    <div class="hero">
-      <h1>Analyze a News Article</h1>
-      <p>Enter a headline and article body to inspect the model prediction.</p>
-    </div>
-    """, unsafe_allow_html=True)
+with tab_check:
+    st.subheader("Check an article")
+    st.write("Paste a headline and the article text. The model was trained on "
+             "both together, so please fill in both.")
 
-    title = st.text_input(
-        "News headline",
-        placeholder="Enter the headline...",
-    )
-    body = st.text_area(
-        "Article text",
-        placeholder="Paste the news article here...",
-        height=250,
-    )
+    with st.container(border=True, key="input_card"):
+        title = st.text_input("Headline")
+        body = st.text_area("Article text", height=240)
+        run_clicked = st.button("Run the classifier", type="primary")
 
-    if st.button("Analyze News", type="primary", width="stretch"):
+    if run_clicked:
         if not title.strip() and not body.strip():
-            st.warning("Please enter a headline or article text.")
+            st.warning("Enter a headline and the article text first.")
         elif not body.strip():
             st.warning(
-                "Please enter the article body. This model was trained "
-                "on headline plus article text; empty-body predictions "
-                "may be unreliable."
+                "The article body is empty. The model was trained on "
+                "headline + body, so a headline alone can give unreliable output."
             )
         else:
-            content = (title + " " + body).lower().strip()
-            content = " ".join(content.split())
+            content = " ".join((title + " " + body).lower().split())
 
             prediction = int(model.predict([content])[0])
-            class_name = "Real" if prediction == 1 else "Fake"
-            decision_score = float(model.decision_function([content])[0])
+            score = float(model.decision_function([content])[0])
+            label = "Real" if prediction == 1 else "Fake"
+            css = "real" if prediction == 1 else "fake"
 
-            st.divider()
-            st.subheader("Prediction")
+            st.markdown(f"""
+            <div class="verdict {css}">
+              <div class="small">Model output</div>
+              <div class="word">{label}</div>
+              <div class="score">decision score {score:+.4f}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-            if prediction == 1:
-                st.success(f"Model classification: {class_name} news")
-            else:
-                st.error(f"Model classification: {class_name} news")
-
-            left, right = st.columns(2)
-            left.metric("Predicted class", class_name)
-            right.metric("Decision score", f"{decision_score:.4f}")
-
-            st.info(
-                "Decision score is not a calibrated probability or a "
-                "confidence percentage. It measures the model's signed "
-                "distance from its decision boundary."
+            st.write(
+                "The decision score is the signed distance from the SVM's "
+                "boundary. It is not a probability or a confidence percentage. "
+                "This is a text-pattern classification, not fact-checking, so "
+                "look at the original source and independent reporting too."
             )
 
-            st.warning(
-                "This is an ML classification, not fact verification. "
-                "Check the original source, date, evidence and independent "
-                "reliable reporting before drawing conclusions."
-            )
-
-            vectorizer = model.named_steps["tfidf"]
-            classifier = model.named_steps["classifier"]
-            vector = vectorizer.transform([content])
-            feature_names = vectorizer.get_feature_names_out()
-            active_indices = vector.nonzero()[1]
+            tfidf = model.named_steps["tfidf"]
+            clf = model.named_steps["classifier"]
+            vec = tfidf.transform([content])
+            names = tfidf.get_feature_names_out()
 
             contributions = []
-            for idx in active_indices:
-                value = float(vector[0, idx] * classifier.coef_[0, idx])
+            for idx in vec.nonzero()[1]:
+                value = float(vec[0, idx] * clf.coef_[0, idx])
                 if value != 0:
-                    contributions.append(
-                        (feature_names[idx], value)
-                    )
+                    contributions.append((names[idx], value))
+            contributions.sort(key=lambda item: abs(item[1]), reverse=True)
 
-            contributions.sort(
-                key=lambda item: abs(item[1]), reverse=True
-            )
-
-            st.subheader("Words influencing this prediction")
-            if contributions:
-                explanation = pd.DataFrame(
-                    contributions[:15],
-                    columns=["Feature", "Contribution"],
-                )
-                explanation["Direction"] = explanation[
-                    "Contribution"
-                ].apply(
-                    lambda value: (
-                        "Toward Real" if value > 0 else "Toward Fake"
-                    )
-                )
-
-                fig = px.bar(
-                    explanation.sort_values("Contribution"),
-                    x="Contribution",
-                    y="Feature",
-                    color="Contribution",
-                    color_continuous_midpoint=0,
-                    orientation="h",
-                    template="plotly_dark",
-                    title="Linear SVM feature contributions",
-                )
-                st.plotly_chart(fig, width="stretch")
-                st.dataframe(
-                    explanation,
-                    width="stretch",
-                    hide_index=True,
-                )
+            st.subheader("Words that pushed the decision")
+            if not contributions:
+                st.write("None of the words in this text are in the model's vocabulary.")
             else:
-                st.write(
-                    "No active weighted vocabulary features were found "
-                    "for this input."
+                top = pd.DataFrame(contributions[:15],
+                                   columns=["Feature", "Contribution"])
+                top["Direction"] = top["Contribution"].apply(
+                    lambda v: "Toward Real" if v > 0 else "Toward Fake"
+                )
+                fig = px.bar(
+                    top.sort_values("Contribution"),
+                    x="Contribution", y="Feature", color="Direction",
+                    orientation="h",
+                    color_discrete_map={"Toward Real": GREEN,
+                                        "Toward Fake": BRICK},
+                )
+                fig.update_layout(legend_title_text="", yaxis_title="")
+                st.plotly_chart(style_fig(fig), width="stretch")
+                show_table(top)
+                section_note(
+                    "These contributions describe how the trained model "
+                    "decided, not whether a statement is true."
                 )
 
-            st.caption(
-                "Feature contributions explain the trained model's "
-                "decision, not whether each statement is factually true."
-            )
 
+# ---------- evaluation details ----------
 
+with tab_eval:
+    st.subheader("Per-seed results")
+    per_seed = read_report("multiseed_robustness_corrected_per_seed.csv")
+    paired = read_report("multiseed_f1_paired_differences_corrected.csv")
 
-elif page == "Model Insights":
-    st.markdown("""
-    <div class="hero">
-      <h1>Model Insights</h1>
-      <p>Compare evaluation settings, test robustness, and inspect influential features.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    if per_seed.empty:
+        st.info("Per-seed report not found in reports/.")
+    else:
+        show_table(per_seed)
 
-    # Corrected multi-seed research reports
-    multiseed = read_report(
-        "multiseed_robustness_corrected_summary.csv"
-    )
-    per_seed = read_report(
-        "multiseed_robustness_corrected_per_seed.csv"
-    )
-    paired = read_report(
-        "multiseed_f1_paired_differences_corrected.csv"
-    )
+    st.subheader("Paired F1 differences")
+    if paired.empty:
+        st.info("Paired-difference report not found in reports/.")
+    else:
+        show_table(paired)
 
-    # Existing reports: retained for comparison and error analysis
+    st.subheader("Earlier cue-ablation run")
     ablation = read_report("cue_ablation_metrics.csv")
-    features = read_report("top_logistic_features.csv")
-    errors = read_report("misclassified_examples.csv")
-
-    st.subheader("Multi-seed robustness")
-
-    if not multiseed.empty:
-        st.caption(
-            "Mean ± sample standard deviation across seeds 7, 21 and 42. "
-            "These are group-aware experiments on the same WELFake dataset."
-        )
-
-        display = multiseed.copy()
-        display["variant"] = display["variant"].replace({
-            "baseline_original_text": "Original text",
-            "source_and_boilerplate_cues_removed":
-                "Source/boilerplate cues removed",
-        })
-
-        metric_names = [
-            ("accuracy", "Accuracy"),
-            ("precision", "Precision"),
-            ("recall", "Recall"),
-            ("f1", "F1 score"),
-            ("roc_auc", "ROC-AUC"),
-        ]
-
-        for metric, label in metric_names:
-            mean_col = f"{metric}_mean"
-            std_col = f"{metric}_std"
-
-            if mean_col in display.columns and std_col in display.columns:
-                display[label] = display.apply(
-                    lambda row: (
-                        f"{float(row[mean_col]):.4f} ± "
-                        f"{float(row[std_col]):.4f}"
-                    ),
-                    axis=1,
-                )
-
-        visible_columns = ["variant"] + [
-            label for _, label in metric_names
-            if label in display.columns
-        ]
-
-        st.dataframe(
-            display[visible_columns],
-            width="stretch",
-            hide_index=True,
-        )
-
-        baseline_rows = multiseed[
-            multiseed["variant"] == "baseline_original_text"
-        ]
-        removed_rows = multiseed[
-            multiseed["variant"]
-            == "source_and_boilerplate_cues_removed"
-        ]
-
-        if not baseline_rows.empty and not removed_rows.empty:
-            baseline_f1 = float(
-                baseline_rows.iloc[0]["f1_mean"]
-            )
-            removed_f1 = float(
-                removed_rows.iloc[0]["f1_mean"]
-            )
-            difference = (baseline_f1 - removed_f1) * 100
-
-            c1, c2 = st.columns(2)
-            c1.metric(
-                "Original text mean F1",
-                f"{baseline_f1 * 100:.2f}%"
-            )
-            c2.metric(
-                "Mean F1 difference",
-                f"{difference:.2f} percentage points"
-            )
-
-            st.info(
-                "Interpretation: the original-text experiment performed "
-                "better across the three tested seeds. This observed "
-                "difference does not, by itself, prove data leakage "
-                "or causation."
-            )
+    if ablation.empty:
+        st.info("cue_ablation_metrics.csv not found in reports/.")
     else:
-        st.warning(
-            "Corrected multi-seed summary was not found. "
-            "Check the reports folder and CSV filename."
+        section_note(
+            "A separate, earlier experiment (Logistic Regression vs Linear SVM). "
+            "Its setup differs from the three-seed runs, so don't compare the "
+            "numbers directly."
         )
+        show_table(ablation)
 
-    if not per_seed.empty:
-        with st.expander("View individual seed results"):
-            st.dataframe(
-                per_seed,
-                width="stretch",
-                hide_index=True,
-            )
-
-    if not paired.empty:
-        with st.expander("View paired F1 differences"):
-            st.dataframe(
-                paired,
-                width="stretch",
-                hide_index=True,
-            )
-
-    st.divider()
-    st.subheader("Earlier cue-ablation comparison")
-
-    if not ablation.empty:
-        st.caption(
-            "This is a separate earlier experiment comparing Logistic "
-            "Regression and Linear SVM. Its evaluation setup differs "
-            "from the corrected three-seed robustness experiment above."
-        )
-        st.dataframe(
-            ablation,
-            width="stretch",
-            hide_index=True,
-        )
-    else:
-        st.info("Earlier cue-ablation results are not available.")
-
-    st.divider()
     st.subheader("Top Logistic Regression features")
-
-    if not features.empty:
-        st.caption(
-            "These coefficients belong to the separate Logistic "
-            "Regression comparison model, not the final Linear SVM."
-        )
-        st.dataframe(
-            features.head(30),
-            width="stretch",
-            hide_index=True,
-        )
+    features = read_report("top_logistic_features.csv")
+    if features.empty:
+        st.info("top_logistic_features.csv not found in reports/.")
     else:
-        st.info("Feature report is not available.")
-
-    st.divider()
-    st.subheader("Sample misclassified records")
-
-    if not errors.empty:
-        st.caption(
-            "Examples of errors from the saved research report. "
-            "Inspect them as individual cases, not as a complete "
-            "measure of model performance."
+        section_note(
+            "These come from the comparison Logistic Regression model, not "
+            "from the final SVM."
         )
-        st.dataframe(
-            errors.head(20),
-            width="stretch",
-            hide_index=True,
-        )
+        show_table(features.head(30))
+
+    st.subheader("Misclassified examples")
+    errors = read_report("misclassified_examples.csv")
+    if errors.empty:
+        st.info("misclassified_examples.csv not found in reports/.")
     else:
-        st.info("Misclassified-record report is not available.")
+        section_note("Individual cases from the saved report, not an overall error rate.")
+        show_table(errors.head(20))
 
-    st.divider()
-    st.subheader("Research limitations")
 
+# ---------- notes ----------
+
+with tab_notes:
+    st.subheader("Method")
     st.markdown("""
-    - All three seeds use different splits of the same WELFake dataset;
-      this is not external-dataset validation.
-    - Group-aware splitting prevents identified groups from crossing
-      train and test sets, but does not guarantee publisher, topic,
-      or temporal independence.
-    - MinHash LSH is approximate and may miss near-duplicate articles.
-    - The source/boilerplate cue list was selected manually. The observed
-      metric difference does not prove that these cues caused data leakage.
-    - Logistic Regression coefficients are from a separate comparison
-      model and should not be presented as explanations of the final SVM.
-    - LinearSVC decision scores are not calibrated probabilities.
-    - The model does not verify news claims against live sources.
+    - Dataset: WELFake (headline + body, labelled Fake or Real)
+    - Cleaning: empty texts and exact duplicates removed
+    - Features: TF-IDF on word unigrams and bigrams
+    - Final model: Linear Support Vector Machine
+    - Evaluation: stratified splits, then group-based splits using near-duplicate groups
+    - Explanation: feature weight times TF-IDF value, per word
+    - Labels: 0 = Fake, 1 = Real
     """)
 
-
-
-else:
-    st.title("About TruthLens")
-    st.write(
-        "TruthLens is an academic research prototype for fake-news "
-        "classification using machine learning and text features."
+    st.subheader("Limitations")
+    st.markdown("""
+    - Every split comes from the same WELFake dataset, so this is not
+      external validation, and a high score here may not carry over to new news.
+    - Group-aware splitting does not guarantee independence by publisher,
+      topic or time.
+    - MinHash LSH is approximate and can miss near-duplicates.
+    - The source-cue list was picked by hand, and the F1 gap it produces is not
+      proof of leakage.
+    - Dataset labels and source mix can carry bias.
+    - SVM decision scores are not calibrated probabilities.
+    - Feature contributions show associations learned by the model, not causes.
+    - The model never checks claims against live sources.
+    """)
+    st.caption(
+        "The saved model is trained on the full cleaned dataset for the demo, "
+        "so its performance should not be quoted as independent test results."
     )
-
-    st.subheader("Methodology")
-    st.markdown("""
-    - Dataset: WELFake
-    - Text representation: TF-IDF word unigrams and bigrams
-    - Final classifier: Linear Support Vector Machine
-    - Evaluation: stratified and group-based experiments
-    - Explainability: weighted feature contributions from the linear model
-    """)
-
-    st.subheader("Label mapping")
-    st.write("Label 0 = Fake; Label 1 = Real.")
-
-    st.subheader("Research limitations")
-    st.markdown("""
-    - Dataset labels and source distribution may introduce bias.
-    - A high test score does not prove generalization to future news.
-    - The model does not verify claims against live sources.
-    - Its decision score is not a probability.
-    - Explanations show model associations, not causal evidence.
-    """)

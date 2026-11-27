@@ -23,5 +23,6 @@ wordcloud>=1.9
 jupyter>=1.0
 jupyterlab>=4.0
 
-streamlit>=1.40
+streamlit>=1.50
+plotly>=5.18
 joblib>=1.3
