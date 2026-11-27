@@ -1,0 +1,12 @@
+{
+  "model": "LinearSVC",
+  "vectorizer": "TF-IDF",
+  "input": "headline + article text",
+  "label_mapping": {
+    "0": "Fake",
+    "1": "Real"
+  },
+  "training_rows": 63104,
+  "removed_empty_text_rows_and_exact_duplicates": true,
+  "dataset": "WELFake_Dataset.csv"
+}

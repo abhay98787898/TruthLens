@@ -47,3 +47,6 @@ saved_models/
 /scratch/
 /tmp/
 *.log
+
+# TruthLens deployment model
+!artifacts/final_svm_pipeline.joblib
